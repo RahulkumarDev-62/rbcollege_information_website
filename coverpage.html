@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RB College Assignment Pro | Optimized Download</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f1f5f9;
+        }
+
+        /* Modern Form UI */
+        .modern-input {
+            @apply w-full px-4 py-3 bg-white border-2 border-gray-100 rounded-xl focus:border-blue-600 focus:ring-0 outline-none transition-all text-sm font-medium;
+        }
+
+        .input-label {
+            @apply block text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 ml-1;
+        }
+
+        /* Preview Area */
+        #preview-wrapper {
+            background: #cbd5e1;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Strict A4 Styling for PDF (Fixed Dimensions) */
+        .a4-container {
+            width: 210mm;
+            height: 297mm;
+            min-width: 210mm;
+            min-height: 297mm;
+            background: white;
+            position: relative;
+            box-sizing: border-box;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .outer-border {
+            position: absolute;
+            top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
+            border: 2px solid #1e3a8a;
+            pointer-events: none;
+        }
+
+        .inner-border {
+            position: absolute;
+            top: 10mm; left: 10mm; right: 10mm; bottom: 10mm;
+            border: 5px double #1e3a8a;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .heading-font { font-family: 'Cinzel', serif; }
+        .title-font { font-family: 'Playfair Display', serif; }
+
+        .photo-box {
+            width: 35mm;
+            height: 45mm;
+            border: 2px solid #1e3a8a;
+            background: #fff;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        @media print {
+            .no-print { display: none; }
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3a8a;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div class="flex flex-col xl:flex-row min-h-screen">
+        
+        <!-- Sidebar Form (Device Friendly) -->
+        <div class="w-full xl:w-[420px] bg-white p-6 shadow-2xl no-print z-50 xl:h-screen xl:overflow-y-auto">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-2 h-10 bg-blue-800 rounded-full"></div>
+                <div>
+                    <h2 class="text-xl font-black text-gray-800 uppercase tracking-tight leading-none">RB COLLEGE</h2>
+                    <p class="text-[10px] font-bold text-blue-600 mt-1 uppercase tracking-widest">Assignment Pro</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="input-label">Student Photo</label>
+                    <input type="file" id="inPhoto" accept="image/*" class="modern-input py-2 text-xs" onchange="handlePhoto(event)">
+                </div>
+
+                <div>
+                    <label class="input-label">Full Name</label>
+                    <input type="text" id="inName" class="modern-input" placeholder="Enter Full Name" oninput="updatePreview()">
+                </div>
+
+                <div>
+                    <label class="input-label">Father's Name</label>
+                    <input type="text" id="inFather" class="modern-input" placeholder="Father's Name" oninput="updatePreview()">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Course</label>
+                        <input type="text" id="inCourse" class="modern-input" placeholder="e.g. B.A." oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="input-label">Semester</label>
+                        <select id="inSemester" class="modern-input cursor-pointer" onchange="updatePreview()">
+                            <option value="">Select Sem</option>
+                            <option value="1st Semester">1st Sem</option>
+                            <option value="2nd Semester">2nd Sem</option>
+                            <option value="3rd Semester">3rd Sem</option>
+                            <option value="4th Semester">4th Sem</option>
+                            <option value="5th Semester">5th Sem</option>
+                            <option value="6th Semester">6th Sem</option>
+                            <option value="7th Semester">7th Sem</option>
+                            <option value="8th Semester">8th Sem</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Session</label>
+                        <input type="text" id="inSession" class="modern-input" placeholder="2023-27" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="input-label">Major Subject</label>
+                        <input type="text" id="inMajor" class="modern-input" placeholder="Subject Name" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="input-label">Assignment Paper Name</label>
+                    <input type="text" id="inSubj" class="modern-input" placeholder="e.g. Paper-I" oninput="updatePreview()">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="input-label">Univ. Roll No.</label>
+                        <input type="text" id="inURoll" class="modern-input" placeholder="Roll No" oninput="updatePreview()">
+                    </div>
+                    <div>
+                        <label class="input-label">Coll. Roll No.</label>
+                        <input type="text" id="inCRoll" class="modern-input" placeholder="Roll No" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="input-label">Submission Date</label>
+                    <input type="date" id="inDate" class="modern-input" oninput="updatePreview()">
+                </div>
+
+                <button onclick="downloadPDF()" id="downloadBtn" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>DOWNLOAD A4 PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="preview-wrapper" class="flex-1">
+            <!-- Capture Area -->
+            <div id="captureArea" class="a4-container">
+                <div class="outer-border"></div>
+                <div class="inner-border"></div>
+                
+                <!-- Logo Only Header -->
+                <div class="text-center pt-14">
+                    <img id="collegeLogo" src="https://rbcollege.wp-fixhub.com/assets/images/logo.png" 
+                         alt="RB College" class="w-[500px] mx-auto mb-2 object-contain"
+                         onerror="this.src='https://via.placeholder.com/600x150?text=RAMASHRAY+BALESHWAR+COLLEGE'">
+                    
+                    <div class="w-56 h-1 bg-blue-900 mx-auto mt-6 rounded-full"></div>
+                    <p class="text-[11px] mt-3 text-gray-500 uppercase font-bold tracking-[0.2em]">Affiliated to L.N. Mithila University, Darbhanga</p>
+                </div>
+
+                <!-- Assignment Title -->
+                <div class="mt-20 text-center">
+                    <div class="inline-block border-y-2 border-blue-900 py-3 px-16">
+                        <h2 class="title-font text-6xl text-blue-950 font-bold italic tracking-tighter">Assignment</h2>
+                    </div>
+                </div>
+
+                <!-- One-Box Details Section (Strict Layout) -->
+                <div class="mt-20 px-16">
+                    <div class="flex justify-between items-start gap-8 bg-blue-50/20 p-8 rounded-xl border border-blue-100/50">
+                        <!-- Left Info -->
+                        <div class="flex-1 space-y-6 text-[15px]">
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Student's Name :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outName">.....................................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Father's Name :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outFather">.....................................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Course :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outCourse">......................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Semester :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outSemester">......................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Session :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outSession">......................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Major Subject :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outMajor">.....................................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Paper / Subject :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outSubj">.....................................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Univ. Roll No. :</span>
+                                <span class="font-bold text-gray-900 tracking-[0.2em]" id="outURoll">.....................................</span>
+                            </div>
+                            <div class="flex border-b-2 border-dotted border-gray-200 pb-1">
+                                <span class="w-44 font-bold text-blue-900 uppercase text-[11px] shrink-0">Coll. Roll No. :</span>
+                                <span class="font-bold text-gray-900 uppercase" id="outCRoll">.....................................</span>
+                            </div>
+                        </div>
+
+                        <!-- Right Photo -->
+                        <div class="photo-box shrink-0 shadow-lg border-2 border-blue-900/50">
+                            <div id="photoPlaceholder" class="text-[9px] text-center text-gray-400 font-black uppercase p-4">PHOTO</div>
+                            <img id="outPhoto" class="hidden" src="" alt="Student">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="absolute bottom-28 left-16 right-16 flex justify-between items-end">
+                    <div>
+                        <p class="font-bold text-blue-900 text-[11px] uppercase mb-2">Submission Date</p>
+                        <p id="outDate" class="text-lg font-bold text-gray-800 border-b-2 border-black pb-1 min-w-[150px] text-center">....................</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="h-14"></div>
+                        <div class="border-t-2 border-black px-12 pt-2">
+                            <p class="font-bold text-blue-900 text-[11px] uppercase">Student Signature</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-5 font-bold uppercase tracking-[2rem] text-2xl">
+                    RB COLLEGE
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handlePhoto(e) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const out = document.getElementById('outPhoto');
+                const ph = document.getElementById('photoPlaceholder');
+                out.src = reader.result;
+                out.classList.remove('hidden');
+                ph.classList.add('hidden');
+            }
+            if(e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function updatePreview() {
+            const mappings = [
+                { in: 'inName', out: 'outName' },
+                { in: 'inFather', out: 'outFather' },
+                { in: 'inCourse', out: 'outCourse' },
+                { in: 'inSemester', out: 'outSemester' },
+                { in: 'inSession', out: 'outSession' },
+                { in: 'inMajor', out: 'outMajor' },
+                { in: 'inSubj', out: 'outSubj' },
+                { in: 'inURoll', out: 'outURoll' },
+                { in: 'inCRoll', out: 'outCRoll' }
+            ];
+            
+            mappings.forEach(m => {
+                const val = document.getElementById(m.in).value;
+                document.getElementById(m.out).innerText = val || (m.out === 'outSemester' ? "Semester" : ".....................................");
+            });
+
+            const dateVal = document.getElementById('inDate').value;
+            if(dateVal) {
+                const d = new Date(dateVal);
+                document.getElementById('outDate').innerText = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+            } else {
+                document.getElementById('outDate').innerText = "....................";
+            }
+            resizePreview();
+        }
+
+        // --- STABLE PDF DOWNLOAD LOGIC ---
+        async function downloadPDF() {
+            const btn = document.getElementById('downloadBtn');
+            const originalBtnContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loader"></div> PROCESSING...';
+
+            const element = document.getElementById('captureArea');
+            
+            // Critical: Temporarily disable CSS transform for clean capture
+            const originalTransform = element.style.transform;
+            element.style.transform = 'none';
+
+            const opt = {
+                margin: 0,
+                filename: 'RB_College_Assignment.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 4, 
+                    useCORS: true, 
+                    logging: false,
+                    width: 794, // Fixed A4 Pixel Width (96 DPI * 8.27in)
+                    height: 1122, // Fixed A4 Pixel Height (96 DPI * 11.69in)
+                    scrollY: 0,
+                    scrollX: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                // We use a Promise wrapper to ensure layout stabilizes
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await html2pdf().set(opt).from(element).save();
+            } catch(e) {
+                console.error("PDF generation error:", e);
+            } finally {
+                // Restore preview scaling
+                element.style.transform = originalTransform;
+                btn.disabled = false;
+                btn.innerHTML = originalBtnContent;
+            }
+        }
+
+        function resizePreview() {
+            const wrapper = document.getElementById('preview-wrapper');
+            const capture = document.getElementById('captureArea');
+            const w = wrapper.offsetWidth - 40;
+            const targetWidth = 794; // Base A4 width in pixels
+            const scale = Math.min(w / targetWidth, 1);
+            
+            if (window.innerWidth < 1280) {
+                capture.style.transformOrigin = 'top center';
+                capture.style.transform = `scale(${scale})`;
+                // Prevent wrapper from collapsing
+                wrapper.style.minHeight = `${1122 * scale + 100}px`;
+            } else {
+                capture.style.transform = 'none';
+                wrapper.style.minHeight = '100vh';
+            }
+        }
+        
+        window.onload = () => {
+            resizePreview();
+            updatePreview();
+        };
+        window.onresize = resizePreview;
+    </script>
+</body>
+</html>
